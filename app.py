@@ -1,10 +1,12 @@
+
+from enum import Enum
+from functools import wraps
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
-from functools import wraps
-from datetime import datetime
-from enum import Enum
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'root'
