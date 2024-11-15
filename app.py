@@ -61,7 +61,7 @@ def staff_required(f):
 @login_required
 def change_role(user_id):
     if current_user.username != 'admin':
-        flash("No tienesss permisos para hacer eso.")
+        flash("No tienes permisos para hacer eso.")
         return redirect(url_for('admin'))
 
     user = User.query.get(user_id)
