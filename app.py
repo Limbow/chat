@@ -66,7 +66,7 @@ def change_role(user_id):
 
     user = User.query.get(user_id)
     if not user:
-        flash("Usuario no encontrado.")
+        flash("Usuario no encontrado")
         return redirect(url_for('admin'))
 
     new_role = request.form['role']
