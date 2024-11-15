@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adminstyle.css') }}">
+
+</head>
+
+{% extends "base.html" %}
+
+{% block content %}
+
+{% with message = get_flashed_messages() %}
+{% if message %}
+    <div style="color: red;" class="flash-message">{{ message[0] }}</div> 
+{% endif %}
+{% endwith %}
+    <h2>Panel de Administración</h2>
+  
+  <input type="text" id="searchInput" onkeyup="searchUsers()" placeholder="Buscar usuarios..." class="form-control mb-3">
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre de Usuario</th>
+        <th>Rol</th>
+        <th>Opciones</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody">
+      {% for user in users %}
+        <tr class="user-row">
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.role.name }}</td>
+          <td class="options">
+            <button class="options-btn">...</button>
+            {% if user.username != 'admin' %}
+            <div class="optionsMenu" style="display: none;">
+                <ul>
+                  <li class="user-action-item">
+                    <a href="#" class="change-role" data-user-id="{{ user.id }}">Cambiar rol</a>
+                    <div class="role-options">
+                        <form method="POST" action="{{ url_for('change_role', user_id=user.id) }}">
+                            <input type="hidden" name="role" value="user">
+                            <button type="submit" class="btn btn-sm btn-secondary">User</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('change_role', user_id=user.id) }}">
+                            <input type="hidden" name="role" value="staff">
+                            <button type="submit" class="btn btn-sm btn-secondary">Staff</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('change_role', user_id=user.id) }}">
+                            <input type="hidden" name="role" value="admin">
+                            <button type="submit" class="btn btn-sm btn-danger">Admin</button>
+                        </form>
+                    </div>
+                  </li>
+                  <li><a href="#" class="ban-user" data-user-id="{{ user.id }}">Banear usuario</a></li>
+                  <li><a href="/send_message" class="send-message" data-user-id="{{ user.id }}">Enviar mensaje</a></li>
+                </ul>
+              </div>
+              
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="/">Volver</a>
+
+  
+  <script>
+    // Función para filtrar usuarios en tiempo real
+    function searchUsers() {
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById('searchInput');
+      filter = input.value.toUpperCase();
+      table = document.getElementById('userTableBody');
+      tr = table.getElementsByTagName('tr');
+      
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName('td')[1]; 
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }       
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const optionsBtns = document.querySelectorAll('.options-btn');
+    
+    optionsBtns.forEach(btn => {
+      btn.addEventListener('click', function(event) {
+        const optionsMenu = this.nextElementSibling;
+        optionsMenu.style.display = optionsMenu.style.display === 'block' ? 'none' : 'block';
+      });
+    });
+    
+    
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.user-row')) {
+        const allOptions = document.querySelectorAll('.optionsMenu');
+        allOptions.forEach(menu => menu.style.display = 'none');
+      }
+    });
+  });
+
+  </script>
+
+{% endblock %}

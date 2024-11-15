@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bandeja de Entrada</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+
+</head>
+<body>
+    {% with message = get_flashed_messages() %}
+    {% if message %}
+        <div class="flash-message">{{ message[0] }}</div>  <!-- Solo mostramos el primer mensaje -->
+    {% endif %}
+    {% endwith %}
+
+    <h1>Bandeja de Entrada</h1><br><br>
+    
+    <form method="POST" action="{{ url_for('inbox') }}">
+        <label for="selected_user">Selecciona un usuario:</label>
+        <select name="selected_user" id="selected_user">
+            <option value="" disabled selected>Selecciona un usuario</option>
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if selected_user and selected_user.id == user.id %}selected{% endif %}>{{ user.username }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Ver conversación</button><br><br>
+    </form>
+
+    <!-- Mostrar mensajes si hay una conversación seleccionada -->
+    {% if selected_user %}
+        <h2>Conversación con {{ selected_user.username }}</h2>
+        <ul>
+            {% for message in messages %}
+                <li>
+                    <strong>{{ 'Tú' if message.sender_id == current_user.id else selected_user.username }}:</strong>
+                    {{ message.content }} ({{ message.timestamp }})
+                </li>
+            {% endfor %}
+        </ul><br>
+
+        <form method="POST" action="{{ url_for('inbox') }}">
+            <input type="hidden" name="selected_user" value="{{ selected_user.id }}">
+            <textarea name="response_content" rows="4" cols="50" placeholder="Escribe tu respuesta..."></textarea><br>
+            <button type="submit">Responder</button>
+        </form>
+    {% else %}
+        <p>Selecciona un usuario para ver la conversación.</p>
+    {% endif %}
+
+    <br><br>
+    <a href="{{ url_for('send_message') }}">Enviar un Mensaje</a><br>
+    <a href="/">Volver</a>
+</body>
+</html>

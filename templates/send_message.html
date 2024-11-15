@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enviar Mensaje</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+
+</head>
+<body>
+    {% with message = get_flashed_messages() %}
+    {% if message %}
+        <div class="flash-message">{{ message[0] }}</div>  <!-- Solo mostramos el primer mensaje -->
+    {% endif %}
+    {% endwith %}
+
+    <h1>Enviar Mensaje</h1>
+    <form action="{{ url_for('send_message') }}" method="post">
+        <label>Para (nombre de usuario):</label><br>
+        <input type="text" name="receiver" required><br>
+        <label>Contenido del mensaje:</label><br>
+        <textarea name="content" required></textarea><br><br>
+        <button type="submit">Enviar</button>
+    </form>
+    <a href="/">Volver</a><br>
+    <a href="{{ url_for('inbox') }}">Ver Bandeja de Entrada</a>
+</body>
+</html>
