@@ -2,7 +2,7 @@
 from enum import Enum
 from functools import wraps
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
@@ -48,26 +48,24 @@ class Message(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 def staff_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'staff' or current_user.role != 'admin':
+        if not current_user.is_authenticated or current_user.role not in [RoleEnum.staff, RoleEnum.admin]:
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
 
 
-@app.route('/admin/change_role/<int:user_id>', methods=['POST'])
+@app.route('/admin/change_role/<int:user_id>', methods=['POST'], endpoint='change_role')
 @login_required
+@staff_required
 def change_role(user_id):
-    if current_user.username != 'admin':
-        flash("No tienes permisos para hacer eso.")
-        return redirect(url_for('admin'))
-
     user = User.query.get(user_id)
     if not user:
         flash("Usuario no encontrado")
-        return redirect(url_for('admin'))
+        return redirect(url_for('admin_page'))
 
     new_role = request.form['role']
     
@@ -75,14 +73,22 @@ def change_role(user_id):
     db.session.commit()
     
     flash(f"Rol de {user.username} cambiado a {new_role}.")
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin_page'))
 
 
-@app.route('/admin', methods=['GET'])
+@app.route('/admin', methods=['GET'], endpoint='admin_page')
 @login_required
+@staff_required
 def admin():
     users = User.query.all()
-    return render_template('admin.html', users=users)
+    return render_template('admin.html', users=users, user_role=current_user.role.value, cUser = current_user)
+
+
+@app.route('/check_username', methods=['POST'])
+def check_username():
+    username = request.json.get('username')
+    existing_user = User.query.filter_by(username=username).first()
+    return jsonify({'exists': existing_user is not None})
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -100,6 +106,7 @@ def register():
         flash('Usuario registrado con éxito', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

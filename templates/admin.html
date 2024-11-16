@@ -38,9 +38,10 @@
           <td>{{ user.role.name }}</td>
           <td class="options">
             <button class="options-btn">...</button>
-            {% if user.username != 'admin' %}
+            {% if user.username != 'admin' and cUser.id != user.id %}
             <div class="optionsMenu" style="display: none;">
                 <ul>
+                  {% if user_role == 'admin' %}
                   <li class="user-action-item">
                     <a href="#" class="change-role" data-user-id="{{ user.id }}">Cambiar rol</a>
                     <div class="role-options">
@@ -58,11 +59,11 @@
                         </form>
                     </div>
                   </li>
+                  {% endif %}
                   <li><a href="#" class="ban-user" data-user-id="{{ user.id }}">Banear usuario</a></li>
                   <li><a href="/send_message" class="send-message" data-user-id="{{ user.id }}">Enviar mensaje</a></li>
                 </ul>
               </div>
-              
             {% endif %}
           </td>
         </tr>

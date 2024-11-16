@@ -15,7 +15,7 @@
     <h1>Bienvenido, {{ current_user.username }}!</h1>
     <p>Rol: {{ current_user.role.name }}</p>
     {% if current_user.role.name == 'staff' or current_user.role.name == 'admin' %}
-    <a href="{{ url_for('admin') }}">Panel de Administración</a><br><br>
+    <a href="{{ url_for('admin_page') }}">Panel de Administración</a><br><br>
     {% endif %}
     <a href="{{ url_for('inbox') }}">Bandeja de Entrada</a><br><br>
     <a href="{{ url_for('logout') }}">Cerrar Sesión</a><br>

@@ -7,23 +7,63 @@
 <body>
     {% with message = get_flashed_messages() %}
     {% if message %}
-        <div class="flash-message">{{ message[0] }}</div>  <!-- Solo mostramos el primer mensaje -->
+        <div class="flash-message">{{ message[0] }}</div> 
     {% endif %}
     {% endwith %}
 
     <h1>Registrarse</h1>
     <form action="{{ url_for('register') }}" method="POST">
+        <span id="info" style="color: blue;">Aviso: El nombre de usuario no debe contener espacios</span><br><br>
         <label for="username">Nombre de Usuario:</label>
-        <input type="text" name="username" required>
+        <input type="text" id="username" name="username" required>
+        <span id="username-feedback" style="color: red; display: none;"></span>
         <br><br>
         
         <label for="password">Contraseña:</label>
         <input type="password" name="password" required>
         <br><br>
         
-        <button type="submit">Registrarse</button>
+        <button type="submit" id="submit-button">Registrarse</button>
     </form>
     
     <p>¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión aquí</a></p>
+
+    <script>
+        const usernameInput = document.getElementById('username');
+        const feedback = document.getElementById('username-feedback');
+        const submitButton = document.getElementById('submit-button');
+
+        usernameInput.addEventListener('input', async () => {
+            const username = usernameInput.value;
+
+            if (username.includes(' ')) {
+                feedback.textContent = 'El nombre de usuario no puede contener espacios';
+                feedback.style.display = 'inline';
+                submitButton.disabled = true;
+                return;
+            }
+            
+            if (username.length > 0) {
+                const response = await fetch("{{ url_for('check_username') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username })
+                });
+                
+                const data = await response.json();
+                if (data.exists) {
+                    feedback.textContent = 'El nombre de usuario ya está en uso';
+                    feedback.style.display = 'inline';
+                    submitButton.disabled = true;
+                } else {
+                    feedback.style.display = 'none';
+                    submitButton.disabled = false;
+                }
+            } else {
+                feedback.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
